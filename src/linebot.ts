@@ -1,61 +1,25 @@
 /// <reference path="./linebot.d.ts" />
+import * as Net from 'net';
 import * as Http from 'http';
 import * as Https from 'https';
 import * as Crypto from 'crypto';
 import * as Request from 'request';
 
-interface IConfig {
+interface ISettings {
     channelSecret: string;
     channelAccessToken: string;
-    port?: number;
 }
 
 const API_URI = 'https://api.line.me/v2/bot';
 const eventTypes: string[] = ['message', 'follow', 'unfollow', 'join', 'leave', 'postback', 'beacon'];
 
 export default class LineBot {
-    private _config: IConfig;
+    private _config: ISettings;
     private _handlers: { [type: string]: (event: LineBot.Webhook.IEvent) => void };
 
-    constructor(config: IConfig) {
+    constructor(config: ISettings) {
         this._config = config;
         this._handlers = {};
-        this.createServer();
-    }
-
-    private createServer(): void {
-        Http.createServer((req: Http.ServerRequest, res: Http.ServerResponse) => {
-            if (req.url !== '/' || req.method !== 'POST') {
-                res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end('');
-            }
-            let body = '';
-            req.on('data', (chunk) => {
-                body += chunk;
-            });
-            req.on('end', () => {
-                const parseBody = JSON.parse(body);
-                const isValid = this.validateSignature(req.headers['x-line-signature'], body);
-                const webhookEvents = parseBody.events;
-                if (!isValid) {
-                    new Error('Invalid request.');
-                    return;
-                }
-                if (!body || !webhookEvents) {
-                    new Error('Not Event.');
-                    return;
-                }
-                webhookEvents.forEach((event: LineBot.Webhook.IEvent) => {
-                    for (const eventType in this._handlers) {
-                        if (eventType === event.type) {
-                            this._handlers[eventType](event);
-                        }
-                    }
-                });
-                res.writeHead(200, { 'Content-Type': 'text/plain' });
-                res.end();
-            });
-        }).listen(this._config.port);
     }
 
     private validateSignature(signature: string, body: string): boolean {
@@ -136,5 +100,42 @@ export default class LineBot {
                 }
             )
         });
+    }
+
+    public listen(path: string, port: number, callback?: Function): Net.Server {
+        const server = Http.createServer((req: Http.ServerRequest, res: Http.ServerResponse) => {
+            if (req.method !== 'POST' || req.url !== path) {
+                res.statusCode = 404;
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                return res.end('Not found');
+            }
+            let body = '';
+            req.on('data', (chunk) => {
+                body += chunk;
+            });
+            req.on('end', () => {
+                const parseBody = JSON.parse(body);
+                const isValid = this.validateSignature(req.headers['x-line-signature'], body);
+                const webhookEvents = parseBody.events;
+                if (!isValid) {
+                    new Error('Invalid request.');
+                    return;
+                }
+                if (!body || !webhookEvents) {
+                    new Error('Not Event.');
+                    return;
+                }
+                webhookEvents.forEach((event: LineBot.Webhook.IEvent) => {
+                    for (const eventType in this._handlers) {
+                        if (eventType === event.type) {
+                            this._handlers[eventType](event);
+                        }
+                    }
+                });
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end();
+            });
+        });
+        return server.listen(port, callback);
     }
 }

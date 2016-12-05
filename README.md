@@ -8,8 +8,7 @@ import * as MessageFacgory from 'linebot-message-factory';
 
 const linebot = new LineBot({
     channelSecret: 'abcdefghigklmnopqrstuwxyz',
-    channelAccessToken: 'abcdefghigklmnopqrstuwxyz',
-    port: 80
+    channelAccessToken: 'abcdefghigklmnopqrstuwxyz'
 });
 
 linebot.on('message', (event: LineBot.Webhook.IMessageEvent) => {
@@ -24,5 +23,5 @@ linebot.on('message', (event: LineBot.Webhook.IMessageEvent) => {
     }
 });
 
-
+linebot.listen('/', 80);
 ```
