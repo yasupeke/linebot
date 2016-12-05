@@ -1,0 +1,21 @@
+{
+  "name": "linebot",
+  "version": "0.0.1",
+  "description": "",
+  "main": "./lib/linebot.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.48",
+    "@types/request": "0.0.36",
+    "typescript": "^2.0.10"
+  }
+}

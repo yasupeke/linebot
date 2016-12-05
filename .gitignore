@@ -1,0 +1,8 @@
+# VSCode
+.vscode
+
+# output
+dist
+
+# node
+node_modules

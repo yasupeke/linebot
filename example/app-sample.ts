@@ -1,10 +1,5 @@
-# linebot
-
-## Example
-
-```Typescript
-import LineBot from 'linebot';
-import * as MessageFacgory from 'linebot-message-factory';
+import LineBot from '../src/linebot';
+import * as MessageFacgory from '../src/linebot-message-factory';
 
 const linebot = new LineBot({
     channelSecret: 'abcdefghigklmnopqrstuwxyz',
@@ -24,5 +19,3 @@ linebot.on('message', (event: LineBot.Webhook.IMessageEvent) => {
     }
 });
 
-
-```
